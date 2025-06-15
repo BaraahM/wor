@@ -170,16 +170,18 @@ export const useCreateEditor = (
     override,
     placeholders,
     readOnly,
+    value,
     ...options
   }: {
     components?: Record<string, any>;
     placeholders?: boolean;
     plugins?: any[];
     readOnly?: boolean;
+    value?: Value;
   } & Omit<CreatePlateEditorOptions, 'plugins'> = {},
   deps: any[] = []
 ) => {
-  const initialValue = React.useMemo(() => {
+  const defaultValue = React.useMemo(() => {
     return [
       {
         children: [{ text: "Co-Founders' Agreement" }],
@@ -297,19 +299,23 @@ export const useCreateEditor = (
       //
     ];
   }, []);
-  return usePlateEditor<Value, (typeof editorPlugins)[number]>(
+
+  const initialValue = value || defaultValue;
+
+  const createPlateUI = (components: Record<string, any>) => {
+    return {
+      ...(readOnly
+        ? viewComponents
+        : placeholders
+          ? withPlaceholders(editorComponents)
+          : editorComponents),
+      ...components,
+    };
+  };
+
+  const editor = usePlateEditor(
     {
-      override: {
-        components: {
-          ...(readOnly
-            ? viewComponents
-            : placeholders
-              ? withPlaceholders(editorComponents)
-              : editorComponents),
-          ...components,
-        },
-        ...override,
-      },
+      override: { components: createPlateUI(components), ...override },
       plugins: [
         ...copilotPlugins,
         ...editorPlugins,
@@ -317,9 +323,9 @@ export const useCreateEditor = (
         FloatingToolbarPlugin,
       ],
       value: initialValue,
-
       ...options,
     },
-    deps
+    [value, ...deps]
   );
+  return editor;
 };

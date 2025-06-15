@@ -16,8 +16,38 @@ import { FloatingToolbar } from '@/components/ui/floating-toolbar';
 import { FloatingToolbarButtons } from '@/components/ui/floating-toolbar-buttons';
 import { VersionHistoryButton } from '@/components/ui/version-history-button';
 
-export function PlateEditor() {
+interface PlateEditorProps {
+  initialTemplate?: {
+    name: string | null;
+    content: string | null;
+  } | null;
+}
+
+export function PlateEditor({ initialTemplate }: PlateEditorProps) {
   const editor = useCreateEditor();
+
+  // Initialize editor with template content
+  React.useEffect(() => {
+    if (initialTemplate?.content && editor) {
+      // Set the initial content from the template
+      const initialValue = [
+        {
+          type: 'h1',
+          children: [{ text: initialTemplate.name || 'Document' }],
+        },
+        {
+          type: 'p',
+          children: [{ text: '' }],
+        },
+        ...initialTemplate.content.split('\n\n').map(paragraph => ({
+          type: 'p',
+          children: [{ text: paragraph }],
+        })),
+      ];
+
+      editor.tf.setValue(initialValue);
+    }
+  }, [editor, initialTemplate]);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -52,7 +82,7 @@ export function PlateEditor() {
 
               {/* Main Content */}
               <div className="flex-1 flex flex-col">
-              
+
                 {/* Editor */}
                 <EditorContainer
                   id="scroll_container"

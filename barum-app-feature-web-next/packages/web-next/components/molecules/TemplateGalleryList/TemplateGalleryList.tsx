@@ -9,7 +9,10 @@ export interface Template {
   id: number;
   name: string;
   category: string;
-  content: string;
+  content: string | Array<{
+    children: Array<{ text: string }>;
+    type: string;
+  }>;
 }
 
 interface TemplateGalleryListProps {

@@ -52,7 +52,12 @@ const TemplatePreview = ({ selectedTemplate }: TemplatePreviewProps) => {
         </Text>
 
         <Text size="md" mb="xl" style={{ lineHeight: 1.6 }} c="dark.6">
-          {selectedTemplate.content}
+          {typeof selectedTemplate.content === 'string' 
+            ? selectedTemplate.content 
+            : selectedTemplate.content.map(block => 
+                block.children.map(child => child.text).join('')
+              ).join('\n\n')
+          }
         </Text>
 
         <Group justify="flex-end" mt="xl">
@@ -66,6 +71,14 @@ const TemplatePreview = ({ selectedTemplate }: TemplatePreviewProps) => {
             customHoverStyles={{
               backgroundColor: 'var(--mantine-color-dark-7)',
               transform: 'scale(1.03)',
+            }}
+            onClick={() => {
+              // Open editor in new tab with template data
+              const contentToPass = typeof selectedTemplate.content === 'string' 
+                ? selectedTemplate.content 
+                : JSON.stringify(selectedTemplate.content);
+              const editorUrl = `http://localhost:3001/editor?template=${encodeURIComponent(selectedTemplate.name)}&content=${encodeURIComponent(contentToPass)}`;
+              window.open(editorUrl, '_blank');
             }}
           >
             Start from this template
