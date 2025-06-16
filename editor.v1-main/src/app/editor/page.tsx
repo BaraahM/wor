@@ -9,11 +9,11 @@ import { SettingsProvider } from '@/components/editor/settings';
 
 function EditorContent() {
   const searchParams = useSearchParams();
-
+  
   const templateData = useMemo(() => {
     const templateName = searchParams.get('template');
     const templateContent = searchParams.get('content');
-
+    
     if (templateName || templateContent) {
       return {
         name: templateName,
