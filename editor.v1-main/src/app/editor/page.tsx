@@ -2,26 +2,25 @@
 
 import { Toaster } from 'sonner';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useMemo } from 'react';
 
 import { PlateEditor } from '@/components/editor/plate-editor';
 import { SettingsProvider } from '@/components/editor/settings';
 
 function EditorContent() {
   const searchParams = useSearchParams();
-  const [templateData, setTemplateData] = useState<{
-    name: string | null;
-    content: string | null;
-  } | null | undefined>(undefined);
 
-  useEffect(() => {
+  const templateData = useMemo(() => {
     const templateName = searchParams.get('template');
     const templateContent = searchParams.get('content');
-    
-    setTemplateData({
-      name: templateName,
-      content: templateContent
-    });
+
+    if (templateName || templateContent) {
+      return {
+        name: templateName,
+        content: templateContent
+      };
+    }
+    return null;
   }, [searchParams]);
 
   return (

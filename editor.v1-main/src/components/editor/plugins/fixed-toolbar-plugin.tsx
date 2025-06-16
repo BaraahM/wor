@@ -10,7 +10,7 @@ export const FixedToolbarPlugin = createPlatePlugin({
   key: 'fixed-toolbar',
   render: {
     beforeEditable: () => (
-      <div className="fixed top-[55px] left-0 right-0 z-40 w-full">
+      <div className="sticky top-0 left-0 right-0 z-40 w-full bg-white border-b border-gray-200">
         <FixedToolbar>
           <FixedToolbarButtons />
         </FixedToolbar>

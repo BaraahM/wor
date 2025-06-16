@@ -17,24 +17,32 @@ export function useVersionHistory() {
   const isLoadingRef = useRef(false);
   const lastSavedContentRef = useRef<any>(null);
 
-  const [versions, setVersions] = useState<Version[]>([
-    {
-      id: '1',
-      content: [{ children: [{ text: 'Welcome to your editor!' }], type: 'p' }],
-      date: new Date(Date.now() - 24 * 60 * 60 * 1000), 
-      isCurrent: false,
-      name: 'Initial version',
-    },
-    {
-      id: '2',
-      content: getDefaultContent(),
-      date: new Date(),
-      isCurrent: true,
-      name: 'Default version',
-    },
-  ]);
+  // Initialize versions - will be populated when editor is ready
+  const [versions, setVersions] = useState<Version[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const currentVersion = versions.find(v => v.isCurrent);
+  // Initialize versions once editor is ready
+  useEffect(() => {
+    if (editor && !isInitialized) {
+      const currentContent = editor.children?.length > 0 ? editor.children : getDefaultContent();
+      const hasTemplateContent = currentContent.length > 2 || 
+        (currentContent[0]?.children?.[0]?.text !== 'New Document' && 
+         currentContent[0]?.children?.[0]?.text !== '');
+
+      const defaultVersion: Version = {
+        id: 'default',
+        content: currentContent,
+        date: new Date(),
+        isCurrent: true,
+        name: hasTemplateContent ? 'Template version' : 'Default version',
+      };
+
+      setVersions([defaultVersion]);
+      setIsInitialized(true);
+    }
+  }, [editor, isInitialized]);
+
+  const currentVersion = versions.find(v => v.isCurrent) || null;
 
   const validateContent = useCallback((content: any) => {
     if (!content || !Array.isArray(content) || content.length === 0) {
@@ -214,16 +222,16 @@ export function useVersionHistory() {
       console.error('Editor not available or content loading');
       return;
     }
-  
+
     try {
       const currentContent = getCurrentEditorContent();
-  
+
       // Count only user-saved versions (exclude initial and default)
       const userVersions = versions.filter(
         v => v.name.startsWith('Version ')
       );
       const nextVersionNumber = userVersions.length + 1;
-  
+
       const newVersion: Version = {
         id: `v_${Date.now()}`,
         content: currentContent,
@@ -231,7 +239,7 @@ export function useVersionHistory() {
         isCurrent: true,
         name: `Version ${nextVersionNumber}`, // sequential name
       };
-  
+
       setVersions(prev => {
         const updatedVersions = prev.map(v =>
           v.isCurrent
@@ -240,7 +248,7 @@ export function useVersionHistory() {
         );
         return [...updatedVersions, newVersion];
       });
-  
+
       console.log('New version saved successfully');
     } catch (error) {
       console.error('Error saving new version:', error);
