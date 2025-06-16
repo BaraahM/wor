@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, ArrowUp, Check, RotateCcw } from 'lucide-react';
+import { X, ArrowUp, Check, RotateCcw, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useChat } from '@/components/editor/use-chat';
 
@@ -208,19 +208,18 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed right-0 top-0 w-80 bg-white border-l border-gray-200 shadow-lg flex flex-col flex-shrink-0 h-full z-50">
+    <div className="fixed right-0 top-14 w-80 bg-white border-l border-gray-200 shadow-lg flex flex-col flex-shrink-0 h-full z-50">
       {/* Header */}
       <div className="border-b border-gray-200 p-4 flex-shrink-0">
-        <div className="flex justify-center items-center mb-4 relative">
-            <h2 className="text-base font-semibold text-gray-900 text-center w-full">Barum AI</h2>
-
-        <button
+      <div className="flex items-center mb-4">
+          <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors mr-3"
             aria-label="Close sidebar"
           >
-            <X className="h-5 w-5" />
+            <ArrowRight className="h-5 w-5" />
           </button>
+          <h2 className="text-base font-semibold text-gray-900 flex-1 text-center">Barum AI</h2>
         </div>
 
         {/* Tab Buttons */}
@@ -230,8 +229,8 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
             className={cn(
               'flex-1 px-4 py-2 text-sm font-medium border border-gray-300 transition-colors',
               activeTab === 'field-input'
-                ? 'bg-white text-gray-900 border-gray-300'
-                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              ? 'bg-[#274F2D] text-white border-[#274F2D]'
+              : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
             )}
           >
             Field input
