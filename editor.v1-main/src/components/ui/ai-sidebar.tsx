@@ -211,9 +211,10 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
     <div className="w-80 bg-white border-l border-gray-200 shadow-lg flex flex-col flex-shrink-0 h-full max-h-screen z-50">
       {/* Header */}
       <div className="border-b border-gray-200 p-4 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Barum AI</h2>
-          <button
+        <div className="flex justify-center items-center mb-4 relative">
+            <h2 className="text-base font-semibold text-gray-900 text-center w-full">Barum AI</h2>
+
+        <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
             aria-label="Close sidebar"
@@ -338,16 +339,16 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask AI something about this document…"
+              placeholder="Ask AI"
               className="w-full resize-none rounded-lg border border-gray-300 p-3 pr-12 text-sm focus:border-[#274F2D] focus:outline-none focus:ring-1 focus:ring-[#274F2D] placeholder-gray-400 transition-colors"
-              rows={3}
+              rows={1}
               disabled={isLoading}
             />
             <button
               onClick={handleSubmit}
               disabled={!input.trim() || isLoading}
               className={cn(
-                'absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full transition-colors',
+                'absolute bottom-3 right-2 flex h-8 w-8 items-center justify-center rounded-full transition-colors',
                 input.trim() && !isLoading
                   ? 'bg-[#274F2D] text-white hover:bg-[#1e3d23]'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
