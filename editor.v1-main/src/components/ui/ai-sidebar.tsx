@@ -208,7 +208,7 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="w-80 bg-white border-l border-gray-200 shadow-lg flex flex-col flex-shrink-0 h-full max-h-screen z-50">
+    <div className="fixed right-0 top-0 w-80 bg-white border-l border-gray-200 shadow-lg flex flex-col flex-shrink-0 h-full z-50">
       {/* Header */}
       <div className="border-b border-gray-200 p-4 flex-shrink-0">
         <div className="flex justify-center items-center mb-4 relative">
@@ -324,6 +324,7 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
         )}
 
         {activeTab === 'field-input' && (
+            
           <div className="text-sm text-gray-500 text-center py-8">
             Field input functionality coming soon...
           </div>
