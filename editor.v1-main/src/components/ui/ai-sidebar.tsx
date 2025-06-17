@@ -1,10 +1,13 @@
-
 'use client';
 
 import React, { useState } from 'react';
-import { X, ArrowUp, Check, RotateCcw, ArrowRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+
+import { ArrowRight, ArrowUp, Check, RotateCcw, X } from 'lucide-react';
+
 import { useChat } from '@/components/editor/use-chat';
+import { cn } from '@/lib/utils';
+
+import { FieldInputSidebar } from './field-input-sidebar';
 
 interface AISidebarProps {
   isOpen: boolean;
@@ -36,20 +39,20 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
 
     try {
       const result = await fetch('/api/ai/command', {
-        method: 'POST',
+        body: JSON.stringify({
+          apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY || '',
+          messages: [
+            {
+              content: prompt,
+              role: 'user',
+            },
+          ],
+          model: 'gpt-3.5-turbo',
+        }),
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-          apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY || '',
-          model: 'gpt-3.5-turbo',
-        }),
+        method: 'POST',
       });
 
       if (!result.ok) {
@@ -78,7 +81,7 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
 
         const chunk = new TextDecoder().decode(value);
         const lines = chunk.split('\n');
-        
+
         for (const line of lines) {
           if (line.startsWith('0:')) {
             try {
@@ -124,27 +127,27 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
 
     try {
       const result = await fetch('/api/ai/command', {
-        method: 'POST',
+        body: JSON.stringify({
+          apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY || '',
+          messages: [
+            {
+              content: message.prompt,
+              role: 'user',
+            },
+          ],
+          model: 'gpt-3.5-turbo',
+        }),
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'user',
-              content: message.prompt,
-            },
-          ],
-          apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY || '',
-          model: 'gpt-3.5-turbo',
-        }),
+        method: 'POST',
       });
 
       if (!result.ok) {
         // Use placeholder response instead of throwing error
         const placeholderResponse = "Here's an alternative perspective on your question: The document contains valuable information that can be approached from multiple angles. Consider exploring different sections to gain a comprehensive understanding. I'm here to help you navigate through the content and provide insights tailored to your specific needs.";
         setMessages(prev => prev.map((msg, i) => 
-          i === index ? { ...msg, response: placeholderResponse, isAccepted: false } : msg
+          i === index ? { ...msg, isAccepted: false, response: placeholderResponse } : msg
         ));
         setIsLoading(false);
         setCurrentPrompt('');
@@ -156,7 +159,7 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
         // Use placeholder response instead of throwing error
         const placeholderResponse = "I'm regenerating a response for you. This document offers rich content that can be analyzed from various perspectives. Let me provide you with helpful insights and suggestions to enhance your understanding and editing experience.";
         setMessages(prev => prev.map((msg, i) => 
-          i === index ? { ...msg, response: placeholderResponse, isAccepted: false } : msg
+          i === index ? { ...msg, isAccepted: false, response: placeholderResponse } : msg
         ));
         setIsLoading(false);
         setCurrentPrompt('');
@@ -170,7 +173,7 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
 
         const chunk = new TextDecoder().decode(value);
         const lines = chunk.split('\n');
-        
+
         for (const line of lines) {
           if (line.startsWith('0:')) {
             try {
@@ -185,7 +188,7 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
 
       // Replace the message at the index
       setMessages(prev => prev.map((msg, i) => 
-        i === index ? { ...msg, response: responseText || "Here's a regenerated response with fresh insights about your document. I'm continuously learning to provide better assistance with your editing and content needs.", isAccepted: false } : msg
+        i === index ? { ...msg, isAccepted: false, response: responseText || "Here's a regenerated response with fresh insights about your document. I'm continuously learning to provide better assistance with your editing and content needs." } : msg
       ));
     } catch (error) {
       console.error('AI request failed:', error);
@@ -213,8 +216,8 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
       <div className="border-b border-gray-200 p-4 flex-shrink-0">
       <div className="flex items-center mb-4">
           <button
-            onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors mr-3"
+            onClick={onClose}
             aria-label="Close sidebar"
           >
             <ArrowRight className="h-5 w-5" />
@@ -225,24 +228,24 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
         {/* Tab Buttons */}
         <div className="flex space-x-0">
           <button
-            onClick={() => setActiveTab('field-input')}
             className={cn(
               'flex-1 px-4 py-2 text-sm font-medium border border-gray-300 transition-colors',
               activeTab === 'field-input'
               ? 'bg-[#274F2D] text-white border-[#274F2D]'
               : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
             )}
+            onClick={() => setActiveTab('field-input')}
           >
             Field input
           </button>
           <button
-            onClick={() => setActiveTab('ask-ai')}
             className={cn(
               'flex-1 px-4 py-2 text-sm font-medium border border-l-0 border-gray-300 transition-colors',
               activeTab === 'ask-ai'
                 ? 'bg-[#274F2D] text-white border-[#274F2D]'
                 : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
             )}
+            onClick={() => setActiveTab('ask-ai')}
           >
             Ask AI
           </button>
@@ -291,24 +294,24 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
                   {!message.isAccepted && (
                     <div className="flex items-center justify-center space-x-3 mt-4 pt-3 border-t border-gray-100">
                       <button
-                        onClick={() => handleAccept(index)}
                         className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-green-50 hover:border-green-300 hover:text-green-600 transition-colors"
+                        onClick={() => handleAccept(index)}
                         title="Accept"
                         aria-label="Accept"
                       >
                         <Check className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => handleReject(index)}
                         className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors"
+                        onClick={() => handleReject(index)}
                         title="Reject"
                         aria-label="Reject"
                       >
                         <X className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => handleRedo(index)}
                         className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-colors"
+                        onClick={() => handleRedo(index)}
                         title="Regenerate"
                         aria-label="Regenerate"
                       >
@@ -323,10 +326,7 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
         )}
 
         {activeTab === 'field-input' && (
-            
-          <div className="text-sm text-gray-500 text-center py-8">
-            Field input functionality coming soon...
-          </div>
+          <FieldInputSidebar />
         )}
       </div>
 
@@ -336,23 +336,23 @@ export function AISidebar({ isOpen, onClose }: AISidebarProps) {
           {/* Input Field */}
           <div className="relative">
             <textarea
+              className="w-full resize-none rounded-lg border border-gray-300 p-3 pr-12 text-sm focus:border-[#274F2D] focus:outline-none focus:ring-1 focus:ring-[#274F2D] placeholder-gray-400 transition-colors"
+              disabled={isLoading}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask AI"
-              className="w-full resize-none rounded-lg border border-gray-300 p-3 pr-12 text-sm focus:border-[#274F2D] focus:outline-none focus:ring-1 focus:ring-[#274F2D] placeholder-gray-400 transition-colors"
               rows={1}
-              disabled={isLoading}
             />
             <button
-              onClick={handleSubmit}
-              disabled={!input.trim() || isLoading}
               className={cn(
                 'absolute bottom-3 right-2 flex h-8 w-8 items-center justify-center rounded-full transition-colors',
                 input.trim() && !isLoading
                   ? 'bg-[#274F2D] text-white hover:bg-[#1e3d23]'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               )}
+              disabled={!input.trim() || isLoading}
+              onClick={handleSubmit}
               aria-label="Submit"
             >
               {isLoading ? (
