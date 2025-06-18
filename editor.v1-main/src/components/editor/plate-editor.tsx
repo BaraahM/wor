@@ -5,31 +5,70 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { Plate } from '@udecode/plate/react';
+import { useEditorRef } from '@udecode/plate/react';
 import { ArrowLeft, User } from 'lucide-react';
 
-import { useCreateEditor } from '@/components/editor/use-create-editor';
-import { Editor, EditorContainer } from '@/components/ui/editor';
 import { AISidebarProvider, useAISidebar } from '@/components/editor/ai-sidebar-context';
-import { MagicWandButton } from '@/components/ui/magic-wand-button';
-import { AISidebar } from '@/components/ui/ai-sidebar';
+import { useCreateEditor } from '@/components/editor/use-create-editor';
 import { VersionHistoryProvider } from '@/components/editor/version-history-context';
+import { AISidebar } from '@/components/ui/ai-sidebar';
 import { Button } from '@/components/ui/button';
 import { DocumentOutline } from '@/components/ui/document-outline';
+import { Editor, EditorContainer } from '@/components/ui/editor';
 import { FloatingToolbar } from '@/components/ui/floating-toolbar';
 import { FloatingToolbarButtons } from '@/components/ui/floating-toolbar-buttons';
+import { MagicWandButton } from '@/components/ui/magic-wand-button';
 import { VersionHistoryButton } from '@/components/ui/version-history-button';
 
 interface PlateEditorProps {
   initialTemplate?: {
-    name: string | null;
     content: string | null;
+    name: string | null;
   } | null;
 }
 
 function AISidebarComponent() {
-  const { isOpen, closeSidebar } = useAISidebar();
+  const { closeSidebar, isOpen } = useAISidebar();
+  const editor = useEditorRef();
+  
+  // Get current editor content
+  const getEditorContent = () => {
+    if (!editor) return '';
+    try {
+      // Get the editor content as plain text
+      const textContent = editor.api.getEditorString();
+      return textContent || '';
+    } catch (error) {
+      console.error('Failed to get editor content:', error);
+      return '';
+    }
+  };
 
-  return <AISidebar isOpen={isOpen} onClose={closeSidebar} />;
+  // Update editor content
+  const handleUpdateEditorContent = (newContent: string) => {
+    if (!editor) return;
+    try {
+      // Parse the new content and set it
+      const lines = newContent.split('\n');
+      const nodes = lines.map(line => ({
+        children: [{ text: line }],
+        type: 'p',
+      }));
+      
+      editor.tf.setValue(nodes.length > 0 ? nodes : [{ children: [{ text: '' }], type: 'p' }]);
+    } catch (error) {
+      console.error('Failed to update editor content:', error);
+    }
+  };
+
+  return (
+    <AISidebar 
+      onClose={closeSidebar} 
+      onUpdateEditorContent={handleUpdateEditorContent}
+      editorContent={getEditorContent()}
+      isOpen={isOpen}
+    />
+  );
 }
 
 function MagicWandButtonComponent() {
@@ -44,16 +83,16 @@ export function PlateEditor({ initialTemplate }: PlateEditorProps) {
     if (initialTemplate?.content) {
       return [
         {
-          type: 'h1',
           children: [{ text: initialTemplate.name || 'Document' }],
+          type: 'h1',
         },
         {
-          type: 'p',
           children: [{ text: '' }],
+          type: 'p',
         },
         ...initialTemplate.content.split('\n\n').map(paragraph => ({
-          type: 'p',
           children: [{ text: paragraph }],
+          type: 'p',
         })),
       ];
     }
