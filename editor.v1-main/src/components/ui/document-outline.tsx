@@ -59,14 +59,19 @@ function getHeadingList(editor: SlateEditor): HeadingItem[] {
 }
 
 export function DocumentOutline({ editor }: DocumentOutlineProps) {
+  const [activeHeadingId, setActiveHeadingId] = React.useState<string | null>(null);
+  
   const headingList = useEditorSelector(
     (editor) => getHeadingList(editor),
     [editor]
   );
 
-  const scrollToHeading = (path: number[]) => {
+  const scrollToHeading = (path: number[], headingId: string) => {
     const targetHeading = headingList.find(h => h.path.join(',') === path.join(','));
     if (!targetHeading) return;
+    
+    // Set the active heading
+    setActiveHeadingId(headingId);
 
     // Try multiple approaches to find the heading element
     let element: Element | null = null;
@@ -160,13 +165,19 @@ export function DocumentOutline({ editor }: DocumentOutlineProps) {
             <button
               key={heading.id}
               className={cn(
-                'w-full text-left text-sm hover:bg-accent hover:text-accent-foreground rounded-sm px-2 py-1.5 transition-colors',
+                'w-full text-left text-sm rounded-sm px-2 py-1.5 transition-colors',
+                activeHeadingId === heading.id 
+                  ? 'bg-black text-white' 
+                  : 'hover:bg-accent hover:text-accent-foreground',
                 heading.level === 1 && 'font-medium',
-                heading.level === 2 && 'pl-4 text-muted-foreground',
-                heading.level === 3 && 'pl-6 text-muted-foreground',
-                heading.level >= 4 && 'pl-8 text-muted-foreground'
+                heading.level === 2 && !activeHeadingId && 'pl-4 text-muted-foreground',
+                heading.level === 3 && !activeHeadingId && 'pl-6 text-muted-foreground',
+                heading.level >= 4 && !activeHeadingId && 'pl-8 text-muted-foreground',
+                heading.level === 2 && activeHeadingId === heading.id && 'pl-4',
+                heading.level === 3 && activeHeadingId === heading.id && 'pl-6',
+                heading.level >= 4 && activeHeadingId === heading.id && 'pl-8'
               )}
-              onClick={() => scrollToHeading(heading.path)}
+              onClick={() => scrollToHeading(heading.path, heading.id)}
             >
               {heading.level === 1 ? `${heading.title}` : `• ${heading.title}`}
             </button>

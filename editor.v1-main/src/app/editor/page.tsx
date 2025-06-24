@@ -1,8 +1,9 @@
 'use client';
 
-import { Toaster } from 'sonner';
-import { useSearchParams } from 'next/navigation';
 import { Suspense, useMemo } from 'react';
+
+import { useSearchParams } from 'next/navigation';
+import { Toaster } from 'sonner';
 
 import { PlateEditor } from '@/components/editor/plate-editor';
 import { SettingsProvider } from '@/components/editor/settings';
@@ -16,8 +17,8 @@ function EditorContent() {
     
     if (templateName || templateContent) {
       return {
-        name: templateName,
-        content: templateContent
+        content: templateContent,
+        name: templateName
       };
     }
     return null;

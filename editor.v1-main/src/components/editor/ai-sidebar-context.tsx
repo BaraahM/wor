@@ -5,8 +5,8 @@ import React, { createContext, useContext, useState } from 'react';
 
 interface AISidebarContextType {
   isOpen: boolean;
-  openSidebar: () => void;
   closeSidebar: () => void;
+  openSidebar: () => void;
   toggleSidebar: () => void;
 }
 
@@ -22,9 +22,9 @@ export function AISidebarProvider({ children }: { children: React.ReactNode }) {
   return (
     <AISidebarContext.Provider
       value={{
+        closeSidebar,
         isOpen,
         openSidebar,
-        closeSidebar,
         toggleSidebar,
       }}
     >

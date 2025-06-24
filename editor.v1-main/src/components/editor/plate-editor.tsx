@@ -5,7 +5,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import { Plate } from '@udecode/plate/react';
-import { useEditorRef } from '@udecode/plate/react';
+import { useEditorRef, useEditorString } from '@udecode/plate/react';
 import { ArrowLeft, User } from 'lucide-react';
 
 import { AISidebarProvider, useAISidebar } from '@/components/editor/ai-sidebar-context';
@@ -31,13 +31,14 @@ function AISidebarComponent() {
   const { closeSidebar, isOpen } = useAISidebar();
   const editor = useEditorRef();
   
-  // Get current editor content
+  // Get current editor content using the hook
+  const editorString = useEditorString();
+  
   const getEditorContent = () => {
     if (!editor) return '';
     try {
-      // Get the editor content as plain text
-      const textContent = editor.api.getEditorString();
-      return textContent || '';
+      // Get the editor content as plain text using the correct Plate v48 API
+      return editorString || '';
     } catch (error) {
       console.error('Failed to get editor content:', error);
       return '';
