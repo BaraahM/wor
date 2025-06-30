@@ -1,0 +1,17 @@
+@keyframes headingHighlightFade {
+  0% {
+    background-color: #D1FFBD;
+  }
+  80% {
+    background-color: #D1FFBD;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.heading-highlight-fade {
+  background-color: #D1FFBD !important;
+  animation: headingHighlightFade 2s ease-out forwards;
+  transition: background-color 0.3s;
+} 

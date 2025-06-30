@@ -4,6 +4,7 @@ import * as React from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
+import { HEADING_KEYS } from '@udecode/plate-heading';
 import { Plate } from '@udecode/plate/react';
 import { useEditorRef, useEditorString } from '@udecode/plate/react';
 import { ArrowLeft, User } from 'lucide-react';
@@ -17,6 +18,7 @@ import { DocumentOutline } from '@/components/ui/document-outline';
 import { Editor, EditorContainer } from '@/components/ui/editor';
 import { FloatingToolbar } from '@/components/ui/floating-toolbar';
 import { FloatingToolbarButtons } from '@/components/ui/floating-toolbar-buttons';
+import { HeadingElement } from '@/components/ui/heading-element';
 import { MagicWandButton } from '@/components/ui/magic-wand-button';
 import { VersionHistoryButton } from '@/components/ui/version-history-button';
 
@@ -100,9 +102,39 @@ export function PlateEditor({ initialTemplate }: PlateEditorProps) {
     return undefined;
   }, [initialTemplate]);
 
+  // Highlight state for headings
+  const [highlightedHeadingId, setHighlightedHeadingId] = React.useState<string | null>(null); // Sidebar
+  const [highlightedEditorHeading, setHighlightedEditorHeading] = React.useState<{ id: string, highlightKey: number } | null>(null); // Editor
+
   const editor = useCreateEditor({
-    value: templateValue
+    value: templateValue,
   });
+
+  // Handler for sidebar highlight (immediate)
+  const handleSidebarHighlight = React.useCallback((id: string) => {
+    setHighlightedHeadingId(id);
+  }, []);
+
+  // Handler for editor highlight (after scroll)
+  const handleHighlightHeading = React.useCallback((heading) => {
+    setHighlightedEditorHeading({ id: heading.id, highlightKey: heading.highlightKey });
+    if (editor && heading.path) {
+      editor.tf.select(heading.path);
+    }
+    setTimeout(() => setHighlightedEditorHeading(null), 4000);
+  }, [editor]);
+
+  // Plate components override to inject highlight (must be after editor is defined)
+  React.useEffect(() => {
+    Object.assign(editor.components ?? {}, {
+      [HEADING_KEYS.h1]: (props) => <HeadingElement {...props} key={highlightedEditorHeading ? highlightedEditorHeading.highlightKey : undefined} variant="h1" highlighted={highlightedEditorHeading && props.element.id === highlightedEditorHeading.id} />,
+      [HEADING_KEYS.h2]: (props) => <HeadingElement {...props} key={highlightedEditorHeading ? highlightedEditorHeading.highlightKey : undefined} variant="h2" highlighted={highlightedEditorHeading && props.element.id === highlightedEditorHeading.id} />,
+      [HEADING_KEYS.h3]: (props) => <HeadingElement {...props} key={highlightedEditorHeading ? highlightedEditorHeading.highlightKey : undefined} variant="h3" highlighted={highlightedEditorHeading && props.element.id === highlightedEditorHeading.id} />,
+      [HEADING_KEYS.h4]: (props) => <HeadingElement {...props} key={highlightedEditorHeading ? highlightedEditorHeading.highlightKey : undefined} variant="h4" highlighted={highlightedEditorHeading && props.element.id === highlightedEditorHeading.id} />,
+      [HEADING_KEYS.h5]: (props) => <HeadingElement {...props} key={highlightedEditorHeading ? highlightedEditorHeading.highlightKey : undefined} variant="h5" highlighted={highlightedEditorHeading && props.element.id === highlightedEditorHeading.id} />,
+      [HEADING_KEYS.h6]: (props) => <HeadingElement {...props} key={highlightedEditorHeading ? highlightedEditorHeading.highlightKey : undefined} variant="h6" highlighted={highlightedEditorHeading && props.element.id === highlightedEditorHeading.id} />,
+    });
+  }, [editor, highlightedEditorHeading]);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -133,7 +165,12 @@ export function PlateEditor({ initialTemplate }: PlateEditorProps) {
               <div className="flex flex-1 relative">
                 {/* Left Sidebar */}
                 <div className="w-64 border-r border-border bg-background p-4 overflow-y-auto flex-shrink-0 z-10">
-                  <DocumentOutline editor={editor} />
+                  <DocumentOutline
+                    onHighlightHeading={handleHighlightHeading}
+                    onSidebarHighlight={handleSidebarHighlight}
+                    editor={editor}
+                    highlightedHeadingId={highlightedHeadingId}
+                  />
                 </div>
 
                 {/* Main Content Area */}

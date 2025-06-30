@@ -18,14 +18,22 @@ const headingVariants = cva('relative mb-1', {
   },
 });
 
+interface HeadingElementStaticProps extends SlateElementProps, VariantProps<typeof headingVariants> {
+  highlighted?: boolean;
+}
+
 export function HeadingElementStatic({
+  highlighted = false,
   variant = 'h1',
   ...props
-}: SlateElementProps & VariantProps<typeof headingVariants>) {
+}: HeadingElementStaticProps) {
   return (
     <SlateElement
       as={variant!}
-      className={headingVariants({ variant })}
+      className={[
+        headingVariants({ variant }),
+        highlighted ? 'heading-highlight-fade' : ''
+      ].filter(Boolean).join(' ')}
       {...props}
     >
       {props.children}

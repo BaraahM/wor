@@ -7,6 +7,10 @@ import type { PlateElementProps } from '@udecode/plate/react';
 import { PlateElement } from '@udecode/plate/react';
 import { type VariantProps, cva } from 'class-variance-authority';
 
+import { cn } from '@/lib/utils';
+
+import './heading-highlight.css';
+
 const headingVariants = cva('relative mb-1', {
   variants: {
     variant: {
@@ -20,14 +24,22 @@ const headingVariants = cva('relative mb-1', {
   },
 });
 
+interface HeadingElementProps extends PlateElementProps, VariantProps<typeof headingVariants> {
+  highlighted?: boolean;
+}
+
 export function HeadingElement({
+  highlighted = false,
   variant = 'h1',
   ...props
-}: PlateElementProps & VariantProps<typeof headingVariants>) {
+}: HeadingElementProps) {
   return (
     <PlateElement
       as={variant!}
-      className={headingVariants({ variant })}
+      className={cn(
+        headingVariants({ variant }),
+        highlighted && 'heading-highlight-fade'
+      )}
       {...props}
     >
       {props.children}

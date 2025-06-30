@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -12,6 +11,9 @@ import { cn } from '@/lib/utils';
 
 interface DocumentOutlineProps {
   editor: SlateEditor;
+  highlightedHeadingId?: string | null;
+  onHighlightHeading?: (heading: HeadingItem) => void;
+  onSidebarHighlight?: (id: string) => void;
 }
 
 interface HeadingItem {
@@ -58,9 +60,7 @@ function getHeadingList(editor: SlateEditor): HeadingItem[] {
   return headings;
 }
 
-export function DocumentOutline({ editor }: DocumentOutlineProps) {
-  const [activeHeadingId, setActiveHeadingId] = React.useState<string | null>(null);
-  
+export function DocumentOutline({ editor, highlightedHeadingId, onHighlightHeading, onSidebarHighlight }: DocumentOutlineProps) {
   const headingList = useEditorSelector(
     (editor) => getHeadingList(editor),
     [editor]
@@ -70,9 +70,6 @@ export function DocumentOutline({ editor }: DocumentOutlineProps) {
     const targetHeading = headingList.find(h => h.path.join(',') === path.join(','));
     if (!targetHeading) return;
     
-    // Set the active heading
-    setActiveHeadingId(headingId);
-
     // Try multiple approaches to find the heading element
     let element: Element | null = null;
     
@@ -139,20 +136,15 @@ export function DocumentOutline({ editor }: DocumentOutlineProps) {
     }
     
     if (element) {
-      // Account for the fixed header and toolbar height
-      const headerHeight = 60;
-      const toolbarHeight = 49;
-      const offset = headerHeight + toolbarHeight + 20;
-      
-      const elementTop = element.getBoundingClientRect().top + window.pageYOffset;
-      const targetPosition = elementTop - offset;
-      
-      window.scrollTo({
-        behavior: 'smooth',
-        top: targetPosition
-      });
+      // Always scroll, even if already visible
+      (element as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
       console.warn('Could not find heading element for:', targetHeading.title);
+    }
+
+    // Notify parent to highlight and select
+    if (onHighlightHeading) {
+      onHighlightHeading({ ...targetHeading, highlightKey: Date.now() });
     }
   };
 
@@ -166,18 +158,21 @@ export function DocumentOutline({ editor }: DocumentOutlineProps) {
               key={heading.id}
               className={cn(
                 'w-full text-left text-sm rounded-sm px-2 py-1.5 transition-colors',
-                activeHeadingId === heading.id 
-                  ? 'bg-black text-white' 
+                highlightedHeadingId === heading.id
+                  ? 'bg-black text-white'
                   : 'hover:bg-accent hover:text-accent-foreground',
                 heading.level === 1 && 'font-medium',
-                heading.level === 2 && !activeHeadingId && 'pl-4 text-muted-foreground',
-                heading.level === 3 && !activeHeadingId && 'pl-6 text-muted-foreground',
-                heading.level >= 4 && !activeHeadingId && 'pl-8 text-muted-foreground',
-                heading.level === 2 && activeHeadingId === heading.id && 'pl-4',
-                heading.level === 3 && activeHeadingId === heading.id && 'pl-6',
-                heading.level >= 4 && activeHeadingId === heading.id && 'pl-8'
+                heading.level === 2 && 'pl-4 text-muted-foreground',
+                heading.level === 3 && 'pl-6 text-muted-foreground',
+                heading.level >= 4 && 'pl-8 text-muted-foreground'
               )}
-              onClick={() => scrollToHeading(heading.path, heading.id)}
+              onClick={() => {
+                if (onSidebarHighlight) onSidebarHighlight(heading.id);
+                scrollToHeading(heading.path, heading.id);
+                setTimeout(() => {
+                  if (onHighlightHeading) onHighlightHeading({ ...heading, highlightKey: Date.now() });
+                }, 100);
+              }}
             >
               {heading.level === 1 ? `${heading.title}` : `• ${heading.title}`}
             </button>
